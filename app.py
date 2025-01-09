@@ -5,7 +5,9 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
 
-DATABASE = 'parking.db'
+DATABASE = 'parking.db' 
+
+
 
 # Helper function to connect to the database
 def get_db_connection():
