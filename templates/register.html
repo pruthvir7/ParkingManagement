@@ -1,15 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #6e7dff, #ffd300);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 25px 40px;
+            border-radius: 20px;
+            width: 70%;
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            transform: scale(1);
+            transition: all 0.3s ease-in-out;
+            max-height: 90vh; /* Set a max height to prevent overflow */
+            overflow-y: auto; /* Ensure it scrolls if content overflows */
+        }
+
+        .container:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px; /* Reduced margin to save space */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        label {
+            font-size: 1rem;
+            text-align: left;
+            margin-bottom: 5px;
+        }
+
+        input {
+            padding: 8px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            margin-bottom: 12px;
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff5f57, #ff3b30);
+            color: white;
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #ff3b30, #ff5f57);
+            transform: scale(1.05);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        button:active {
+            transform: scale(1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 15px 0;
+            font-size: 1rem;
+        }
+
+        .messages li {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 20px;
+                max-height: 80vh; /* Further reduce max height on small screens */
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            input, button {
+                font-size: 1rem;
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Register</h1>
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <ul>
+            <ul class="messages">
                 {% for category, message in messages %}
                 <li class="{{ category }}">{{ message }}</li>
                 {% endfor %}

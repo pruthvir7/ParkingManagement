@@ -1,13 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #6e7dff, #ffd300);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 50px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            transform: scale(1);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .container:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.8;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .btn {
+            text-decoration: none;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff5f57, #ff3b30);
+            border-radius: 50px;
+            color: white;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #ff3b30, #ff5f57);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Welcome to Smart Parking</h1>
-        <p>Your smart parking solution.</p>
+        <p>Your smart parking solution for a seamless experience.</p>
         <div class="buttons">
             <a href="{{ url_for('register') }}" class="btn">Register</a>
             <a href="{{ url_for('login') }}" class="btn">Login</a>
