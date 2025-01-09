@@ -112,9 +112,9 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Payment</h1>
-        <div class="card">
+    <div class="container mt-5">
+        <h1 class="text-center">Payment</h1>
+        <div class="card p-4 shadow-sm">
             <h3 class="mb-3">Reservation Details</h3>
             <p><strong>Lot Name:</strong> {{ session_data['lot_name'] }}</p>
             <p><strong>Slot Name:</strong> {{ session_data['slot_name'] }}</p>
@@ -122,13 +122,10 @@
             <p><strong>End Time:</strong> {{ end_time }}</p>
             <p><strong>Total Time Spent:</strong> {{ total_time_spent }}</p>
             <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
-<<<<<<< Updated upstream
+            
+            <!-- Ensure the button is inside a form -->
             <form method="POST" action="{{ url_for('confirm_payment') }}">
                 <button type="submit" class="btn btn-primary btn-block">Pay Now</button>
-=======
-            <form method="POST" action="{{ url_for('payment') }}">
-                <button type="submit" class="btn btn-block">Pay Now</button>
->>>>>>> Stashed changes
             </form>
         </div>
     </div>
