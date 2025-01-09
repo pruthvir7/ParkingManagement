@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Payment Confirmation</h2>
+        <p>Here are the details of your pending payment:</p>
+
+        <div class="payment-details">
+            <p><strong>License Plate:</strong> {{ session_data['license_plate'] }}</p>
+            <p><strong>Duration:</strong> {{ session_data['duration'] }} hours</p>
+            <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
+            <p><strong>End Time:</strong> {{ session_data['end_time'] }}</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('confirm_payment') }}">
+            <div class="confirm-payment">
+                <button type="submit">Confirm Payment</button>
+            </div>
+        </form>
+
+        <div class="back-to-lots">
+            <a href="{{ url_for('lots') }}">Go back to Parking Lots</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Parking Management System. All rights reserved.</p>
+    </footer>
+</body>
+</html>

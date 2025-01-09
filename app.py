@@ -5,9 +5,7 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
 
-DATABASE = 'parking.db' 
-
-
+DATABASE = 'parking.db'
 
 # Helper function to connect to the database
 def get_db_connection():
@@ -51,18 +49,54 @@ def login():
         user = conn.execute(
             "SELECT * FROM users WHERE email = ? AND password = ?", (email, password)
         ).fetchone()
-        conn.close()
+
         if user:
-            session['license_plate'] = user['license_plate']  # Save license plate in session
-            flash("Login successful!", "success")  # Use the 'success' category for login success
+            license_plate = user['license_plate']
+            session['license_plate'] = license_plate
+
+            # Check for unpaid parking session
+            unpaid_session = conn.execute('''
+                SELECT * 
+                FROM parking_sessions
+                WHERE license_plate = ? AND paid = 0 AND end_time IS NOT NULL
+                ORDER BY end_time DESC
+                LIMIT 1
+            ''', (license_plate,)).fetchone()
+
+            conn.close()
+
+            if unpaid_session:
+                flash("You have a pending payment for a completed parking session.", "danger")
+                return redirect(url_for('payment'))
+
+            flash("Login successful!", "success")
             return redirect(url_for('lots'))
         else:
-            flash("Invalid email or password.", "danger")  # Use the 'danger' category for login errors
+            flash("Invalid email or password.", "danger")
     return render_template('login.html')
+
+
 
 
 @app.route('/lots')
 def lots():
+    license_plate = session.get('license_plate')
+    if not license_plate:
+        flash("You must be logged in to access this page.", "danger")
+        return redirect(url_for('login'))
+    
+    # Check for unpaid reservations
+    conn = get_db_connection()
+    unpaid_reservation = conn.execute('''
+        SELECT * FROM reservations
+        WHERE license_plate = ? AND paid = 0
+    ''', (license_plate,)).fetchone()
+    conn.close()
+    
+    if unpaid_reservation:
+        flash("You have unpaid reservations. Please proceed to payment.", "warning")
+        return redirect(url_for('payment'))
+    
     lots = ['Lot A', 'Lot B', 'Lot C', 'Lot D']
     return render_template('lots.html', lots=lots)
 
@@ -143,14 +177,65 @@ def payment():
         return redirect(url_for('login'))
 
     conn = get_db_connection()
-    reservation = conn.execute('''
-        SELECT * FROM reservations WHERE license_plate = ? AND reservation_expiry > DATETIME('now')
-        ORDER BY reservation_expiry DESC LIMIT 1
+    # Fetch the latest unpaid, completed parking session
+    session_data = conn.execute('''
+        SELECT * 
+        FROM parking_sessions
+        WHERE license_plate = ? AND paid = 0 AND end_time IS NOT NULL
+        ORDER BY end_time DESC
+        LIMIT 1
     ''', (license_plate,)).fetchone()
+
+    if not session_data:
+        flash("No pending payments found.", "success")
+        conn.close()
+        return redirect(url_for('lots'))
+
+    # Calculate payment based on duration
+    total_amount = session_data['duration'] * 50  # Assuming 50 per hour
+
     conn.close()
 
-    total_amount = 50  # Example calculation
-    return render_template('payment.html', total_amount=total_amount, reservation=reservation)
+    # Pass session_data explicitly to the template
+    return render_template('payment.html', total_amount=total_amount, session_data=session_data)
+
+
+@app.route('/confirm_payment', methods=['POST'])
+def confirm_payment():
+    license_plate = session.get('license_plate')
+    
+    print(f"License Plate: {license_plate}")  # Debugging
+
+    if not license_plate:
+        flash("You must be logged in to confirm payment.", "danger")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    row_to_update = conn.execute('''
+        SELECT id
+        FROM parking_sessions
+        WHERE license_plate = ? AND end_time IS NOT NULL AND paid = 0
+        ORDER BY end_time DESC
+        LIMIT 1
+    ''', (license_plate,)).fetchone()
+
+    if row_to_update:
+        conn.execute('''
+            UPDATE parking_sessions
+            SET paid = 1
+            WHERE id = ?
+        ''', (row_to_update['id'],))
+        conn.commit()
+        flash("Payment confirmed successfully!", "success")
+    else:
+        flash("No pending payments to confirm.", "info")
+
+    conn.close()
+
+    print("Redirecting to 'lots' page...")  # Debugging
+
+    return redirect(url_for('lots'))
+
 
 @app.route('/logout')
 def logout():
