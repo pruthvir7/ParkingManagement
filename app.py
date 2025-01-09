@@ -67,6 +67,7 @@ def login():
             conn.close()
 
             if unpaid_session:
+                print("Redirecting to payment for unpaid session.")  # Debugging
                 flash("You have a pending payment for a completed parking session.", "danger")
                 return redirect(url_for('payment'))
 
@@ -79,27 +80,33 @@ def login():
 
 
 
+
 @app.route('/lots')
 def lots():
     license_plate = session.get('license_plate')
     if not license_plate:
         flash("You must be logged in to access this page.", "danger")
         return redirect(url_for('login'))
-    
-    # Check for unpaid reservations
+
     conn = get_db_connection()
-    unpaid_reservation = conn.execute('''
-        SELECT * FROM reservations
-        WHERE license_plate = ? AND paid = 0
+
+    # Check for unpaid parking sessions
+    unpaid_session = conn.execute('''
+        SELECT * 
+        FROM parking_sessions 
+        WHERE license_plate = ? AND paid = 0 AND end_time IS NOT NULL
     ''', (license_plate,)).fetchone()
-    conn.close()
-    
-    if unpaid_reservation:
-        flash("You have unpaid reservations. Please proceed to payment.", "warning")
+
+    if unpaid_session:
+        conn.close()
+        flash("You have unpaid parking charges. Please proceed to payment.", "warning")
         return redirect(url_for('payment'))
-    
+
+    conn.close()
     lots = ['Lot A', 'Lot B', 'Lot C', 'Lot D']
     return render_template('lots.html', lots=lots)
+
+
 
 @app.route('/slots/<lot_name>', methods=['GET'])
 def slots(lot_name):
@@ -188,17 +195,35 @@ def payment():
     ''', (license_plate,)).fetchone()
 
     if not session_data:
-        flash("No pending payments found.", "success")
         conn.close()
+        # Only redirect to `lots` if no pending payments exist
         return redirect(url_for('lots'))
 
     # Calculate payment based on duration
-    total_amount = session_data['duration'] * 50  # Assuming 50 per hour
+    duration_minutes = session_data['duration'] // 60  # Convert seconds to minutes
+    if duration_minutes <= 10:
+        total_amount = 20  # Flat rate for first 10 minutes
+    else:
+        additional_minutes = duration_minutes - 10
+        total_amount = 20 + (additional_minutes * 2)  # ₹20 for first 10 mins + ₹2 per extra minute
+
+    # Calculate total time spent
+    start_time = datetime.strptime(session_data['start_time'], '%Y-%m-%d %H:%M:%S')
+    end_time = datetime.strptime(session_data['end_time'], '%Y-%m-%d %H:%M:%S')
+    total_time_spent = end_time - start_time
 
     conn.close()
 
-    # Pass session_data explicitly to the template
-    return render_template('payment.html', total_amount=total_amount, session_data=session_data)
+    return render_template(
+        'payment.html',
+        total_amount=total_amount,
+        session_data=session_data,
+        start_time=start_time.strftime('%Y-%m-%d %H:%M:%S'),
+        end_time=end_time.strftime('%Y-%m-%d %H:%M:%S'),
+        total_time_spent=str(total_time_spent)
+    )
+
+
 
 
 @app.route('/confirm_payment', methods=['POST'])
