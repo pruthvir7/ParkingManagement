@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Payment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Payment</h1>
+        {% if reservation %}
+        <p>License Plate: {{ reservation['license_plate'] }}</p>
+        <p>Lot: {{ reservation['lot_name'] }}</p>
+        <p>Slot: {{ reservation['slot_name'] }}</p>
+        <p>Reserved Until: {{ reservation['reservation_expiry'] }}</p>
+        {% endif %}
+        <p>Total Amount: ₹{{ total_amount }}</p>
+        <button onclick="location.href='/'">Pay Now</button>
+    </div>
+</body>
+</html>

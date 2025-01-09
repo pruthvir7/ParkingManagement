@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Booking Options</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Choose Your Option</h1>
+        <div class="options">
+            <a href="{{ url_for('existing_booking') }}" class="btn">Existing Booking</a>
+            <a href="{{ url_for('lots') }}" class="btn">New Booking</a>
+        </div>
+    </div>
+</body>
+</html>

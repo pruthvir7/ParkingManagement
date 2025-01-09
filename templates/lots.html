@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Parking Lots</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Select a Parking Lot</h1>
+        <div class="lots">
+            {% for lot in lots %}
+            <a href="{{ url_for('slots', lot_name=lot) }}" class="lot">{{ lot }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

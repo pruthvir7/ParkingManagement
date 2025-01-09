@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Thank You</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Thank You for Your Booking!</h1>
+        <p>Your booking details are as follows:</p>
+        <ul>
+            <li><strong>License Plate:</strong> {{ booking_details['license_plate'] }}</li>
+            <li><strong>Lot Name:</strong> {{ booking_details['lot_name'] }}</li>
+            <li><strong>Slot Name:</strong> {{ booking_details['slot_name'] }}</li>
+            <li><strong>Reservation Expiry:</strong> {{ booking_details['reservation_expiry'] }}</li>
+        </ul>
+        <a href="{{ url_for('lots') }}" class="btn">Book Another Slot</a>
+    </div>
+</body>
+</html>

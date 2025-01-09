@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Slots</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Slots in {{ lot_name }}</h1>
+        <div class="slots">
+            {% for slot, expiry in slots.items() %}
+            <form method="POST" action="/reserve">
+                <input type="hidden" name="lot_name" value="{{ lot_name }}">
+                <input type="hidden" name="slot_name" value="{{ slot }}">
+                <input type="hidden" name="license_plate" value="{{ session['license_plate'] }}">
+                <button type="submit" 
+                        class="slot {{ 'occupied' if expiry else 'available' }}" 
+                        {% if expiry %}disabled{% endif %}>
+                    {{ slot }}
+                    {% if expiry %}
+                        (Reserved until {{ expiry.strftime('%H:%M:%S') }})
+                    {% endif %}
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
