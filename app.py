@@ -7,6 +7,7 @@ app.secret_key = "your_secret_key"
 
 DATABASE = 'parking.db'
 
+
 # Helper function to connect to the database
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
