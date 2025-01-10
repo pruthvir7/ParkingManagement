@@ -1,41 +1,39 @@
 import sqlite3
+from datetime import datetime
 
-# SQLite Database Configuration
-DATABASE = 'parking.db'
+DATABASE = "parking.db"
 
-# Initialize the database and create required tables
-def initialize_db():
+def insert_new_parking_session(license_plate, lot_name, slot_name):
+    """
+    Inserts a new row into the parking_sessions table.
+    """
     conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    # Create the reservations table (if not already created)
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS reservations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        license_plate TEXT NOT NULL,
-        lot_name TEXT NOT NULL,
-        slot_name TEXT NOT NULL,
-        reservation_expiry TIMESTAMP NOT NULL
-    )
-    ''')
+        # Insert the new row
+        cursor.execute('''
+            INSERT INTO parking_sessions (license_plate, lot_name, slot_name, start_time, end_time, duration, paid)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            license_plate,
+            lot_name,
+            slot_name,
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Current timestamp for start_time
+            None,  # No end_time yet
+            None,  # No duration yet
+            0      # Not paid yet
+        ))
 
-    # Create the parking_sessions table
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS parking_sessions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        license_plate TEXT NOT NULL,
-        lot_name TEXT NOT NULL,
-        slot_name TEXT NOT NULL,
-        start_time TIMESTAMP NOT NULL,
-        end_time TIMESTAMP NOT NULL,
-        duration REAL NOT NULL
-    )
-    ''')
+        # Commit the changes
+        conn.commit()
+        print(f"New parking session added: {license_plate} in {lot_name}, {slot_name}")
+    except sqlite3.Error as e:
+        print(f"Error inserting new parking session: {e}")
+    finally:
+        conn.close()
 
-    conn.commit()
-    conn.close()
-    print("Database initialized successfully!")
-
-# Run the initialization
+# Example usage
 if __name__ == "__main__":
-    initialize_db()
+    # Add a new parking session
+    insert_new_parking_session("CC 19 EW 0001", "Lot_A", "Slot_1")

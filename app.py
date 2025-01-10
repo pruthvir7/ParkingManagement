@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import sqlite3
 from datetime import datetime, timedelta
+from twilio.rest import Client
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
@@ -105,6 +106,63 @@ def lots():
     conn.close()
     lots = ['Lot A', 'Lot B', 'Lot C', 'Lot D']
     return render_template('lots.html', lots=lots)
+
+def send_alert(actual_license_plate, reserved_license_plate):
+    # Twilio credentials
+    account_sid = "AC3db0b56ac1e8939e60ace980f9f16156"  # Replace with your Twilio Account SID
+    auth_token = "c6cae599e693f6529f23ad3a969eedf5"    # Replace with your Twilio Auth Token
+    client = Client(account_sid, auth_token)
+
+    # Your mobile number (person in charge of parking lot)
+    manager_phone_number = "+919741078794"  # Replace with your verified Twilio number
+
+    # SMS content
+    message_body = (
+        f"Alert! License plate mismatch detected.\n"
+        f"Actual: {actual_license_plate}\n"
+        f"Reserved: {reserved_license_plate}.\n"
+        f"Please verify the issue immediately."
+    )
+
+    # Send SMS
+    message = client.messages.create(
+        body=message_body,
+        from_="+17174008507",  # Replace with your Twilio phone number
+        to=manager_phone_number  # Send alert to the parking manager
+    )
+
+    print(f"Alert sent to {manager_phone_number}: {message.sid}")
+
+
+
+@app.route('/validate_entry', methods=['POST'])
+def validate_entry():
+    actual_license_plate = request.form['license_plate']  # License plate captured on entry
+    lot_name = request.form['lot_name']
+    slot_name = request.form['slot_name']
+
+    conn = get_db_connection()
+    reservation = conn.execute('''
+        SELECT * FROM reservations
+        WHERE lot_name = ? AND slot_name = ? AND reservation_expiry > DATETIME('now')
+    ''', (lot_name, slot_name)).fetchone()
+
+    conn.close()
+
+    if reservation:
+        reserved_license_plate = reservation['license_plate']
+        if actual_license_plate != reserved_license_plate:
+            print(f"Mismatch detected: {actual_license_plate} != {reserved_license_plate}.")
+            # Send alert to parking manager
+            send_alert(actual_license_plate, reserved_license_plate)
+            flash("License plate mismatch detected! Alert sent to the parking manager.", "danger")
+        else:
+            flash("License plate matches the reservation. Entry validated.", "success")
+    else:
+        flash("No reservation found for this slot.", "warning")
+
+    return redirect(url_for('lots'))
+
 
 
 
