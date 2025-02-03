@@ -1,7 +1,7 @@
 import pymysql
 import time
 import os
-from app import send_alert  # Import the existing send_alert function
+from app import send_alert 
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -14,8 +14,8 @@ RDS_USER = os.getenv('RDS_USER')
 RDS_PASSWORD = os.getenv('RDS_PASSWORD')
 RDS_DB_NAME = os.getenv('RDS_DB_NAME')
 
-EXPECTED_PLATE = "KA 18 EQ 0001"  # Replace with the expected plate
-PHONE_NUMBER = "+919741078794"  # Replace with your desired phone number
+EXPECTED_PLATE = "KA 18 EQ 0001" 
+PHONE_NUMBER = os.getenv("MANAGER_PHONE_NUMBER")  
 
 
 def get_db_connection():
