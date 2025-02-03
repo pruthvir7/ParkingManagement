@@ -153,15 +153,19 @@
 <body>
     <div class="container">
         <h1>Login</h1>
-        <!-- {% with messages = get_flashed_messages(with_categories=true) %}
+
+        <!-- Flash messages for login errors or success -->
+        {% with messages = get_flashed_messages() %}
         {% if messages %}
             <ul>
-                {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
                 {% endfor %}
             </ul>
         {% endif %}
-        {% endwith %} -->
+        {% endwith %}
+
+        <!-- Login Form -->
         <form method="POST" action="/login">
             <label for="username">Email:</label>
             <input type="text" name="username" required>

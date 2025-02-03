@@ -63,6 +63,14 @@ def login():
         password = request.form['password']
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        # Check for superadmin credentials
+        if email == 'superadmin' and password == 'superadmin':
+            session['role'] = 'superadmin'  # Store superadmin in session
+            flash("Login successful! Welcome Super Admin.", "success")
+            return redirect(url_for('superadmin_dashboard'))
+
+        # Check for regular user credentials
         cursor.execute(
             "SELECT * FROM users WHERE email = %s AND password = %s", (email, password)
         )
@@ -82,10 +90,7 @@ def login():
             ''', (license_plate,))
             unpaid_session = cursor.fetchone()
 
-            conn.close()
-
             if unpaid_session:
-                print("Redirecting to payment for unpaid session.")  # Debugging
                 flash("You have a pending payment for a completed parking session.", "danger")
                 return redirect(url_for('payment'))
 
@@ -93,7 +98,10 @@ def login():
             return redirect(url_for('lots'))
         else:
             flash("Invalid email or password.", "danger")
+    
     return render_template('login.html')
+
+
 
 
 @app.route('/lots')
@@ -378,6 +386,110 @@ def logout():
     session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for('dashboard'))
+
+@app.route('/superadmin')
+def superadmin_dashboard():
+    # Ensure the user is logged in and is a superadmin
+    if session.get('role') != 'superadmin':
+        flash("You do not have permission to access this page.", "danger")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM users")
+    users = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM reservations")
+    reservations = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM parking_sessions")
+    parking_sessions = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('super_admin.html', users=users, reservations=reservations, parking_sessions=parking_sessions)
+
+
+# Add User
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    name = request.form['name']
+    email = request.form['email']
+    mobile = request.form['mobile']
+    license_plate = request.form['license_plate']
+    password = (request.form['password'])
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            INSERT INTO users (name, email, mobile, license_plate, password, role) 
+            VALUES (%s, %s, %s, %s, %s, 'user')
+        """, (name, email, mobile, license_plate, password))
+        conn.commit()
+        flash("User added successfully!", "success")
+    except pymysql.MySQLError:
+        flash("Error adding user. Please try again.", "danger")
+        conn.rollback()
+
+    conn.close()
+    return redirect(url_for('superadmin_dashboard'))
+
+
+# Delete User
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+        flash("User deleted successfully.", "success")
+    except pymysql.MySQLError:
+        flash("Error deleting user. Please try again.", "danger")
+        conn.rollback()
+
+    conn.close()
+    return redirect(url_for('superadmin_dashboard'))
+
+
+# Delete Reservation
+@app.route('/delete_reservation/<int:reservation_id>', methods=['POST'])
+def delete_reservation(reservation_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("DELETE FROM reservations WHERE id = %s", (reservation_id,))
+        conn.commit()
+        flash("Reservation deleted successfully.", "success")
+    except pymysql.MySQLError:
+        flash("Error deleting reservation. Please try again.", "danger")
+        conn.rollback()
+
+    conn.close()
+    return redirect(url_for('superadmin_dashboard'))
+
+
+# Mark Parking Session as Paid
+@app.route('/mark_paid/<int:session_id>', methods=['POST'])
+def mark_paid(session_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("UPDATE parking_sessions SET paid = 1 WHERE id = %s", (session_id,))
+        conn.commit()
+        flash("Parking session marked as paid.", "success")
+    except pymysql.MySQLError:
+        flash("Error marking session as paid. Please try again.", "danger")
+        conn.rollback()
+
+    conn.close()
+    return redirect(url_for('superadmin_dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True)

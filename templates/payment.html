@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment</title>
+    <title>Super Admin Dashboard</title>
     <style>
         /* Global Styles */
         body {
@@ -48,6 +48,7 @@
             border-radius: 10px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             color: #333;
+            margin-bottom: 20px;
         }
 
         .card h3 {
@@ -113,19 +114,36 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center">Payment</h1>
-        <div class="card p-4 shadow-sm">
-            <h3 class="mb-3">Reservation Details</h3>
-            <p><strong>Lot Name:</strong> {{ session_data['lot_name'] }}</p>
-            <p><strong>Slot Name:</strong> {{ session_data['slot_name'] }}</p>
-            <p><strong>Start Time:</strong> {{ start_time }}</p>
-            <p><strong>End Time:</strong> {{ end_time }}</p>
-            <p><strong>Total Time Spent:</strong> {{ total_time_spent }}</p>
-            <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
-            
-            <!-- Ensure the button is inside a form -->
-            <form method="POST" action="{{ url_for('confirm_payment') }}">
-                <button type="submit" class="btn btn-primary btn-block">Pay Now</button>
+        <h1 class="text-center">Super Admin Dashboard</h1>
+        
+        <!-- Add Users Section -->
+        <div class="card">
+            <h3>Add New User</h3>
+            <form action="{{ url_for('add_user') }}" method="POST">
+                <input type="text" name="name" placeholder="Name" required><br>
+                <input type="email" name="email" placeholder="Email" required><br>
+                <input type="text" name="mobile" placeholder="Mobile" required><br>
+                <input type="text" name="license_plate" placeholder="License Plate" required><br>
+                <input type="password" name="password" placeholder="Password" required><br>
+                <button type="submit" class="btn">Add User</button>
+            </form>
+        </div>
+
+        <!-- Delete Reservations Section -->
+        <div class="card">
+            <h3>Delete Reservations</h3>
+            <form action="{{ url_for('delete_reservation') }}" method="POST">
+                <input type="text" name="reservation_id" placeholder="Reservation ID" required><br>
+                <button type="submit" class="btn">Delete Reservation</button>
+            </form>
+        </div>
+
+        <!-- Convert Parking Session to Paid Section -->
+        <div class="card">
+            <h3>Mark Parking Session as Paid</h3>
+            <form action="{{ url_for('mark_paid') }}" method="POST">
+                <input type="text" name="session_id" placeholder="Session ID" required><br>
+                <button type="submit" class="btn">Mark as Paid</button>
             </form>
         </div>
     </div>
