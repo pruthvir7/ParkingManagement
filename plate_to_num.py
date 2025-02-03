@@ -1,5 +1,5 @@
 import cv2
-import sqlite3
+import pymysql
 from datetime import datetime, timedelta
 import easyocr  # For OCR to extract text from the plate
 import numpy as np  # For preprocessing enhancements
@@ -8,25 +8,36 @@ import re  # For validating license plate format
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'])
 
-# SQLite Database Configuration
-DATABASE = 'parking.db'
+# MySQL Database Configuration
+RDS_HOST = "parking.ca1c6oui86e2.us-east-1.rds.amazonaws.com"
+RDS_USER = "root"
+RDS_PASSWORD = "codeath123"
+RDS_DB_NAME = "parking"
 
-# Function to connect to the database
+# Helper function to connect to the AWS RDS MySQL database
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+    conn = pymysql.connect(
+        host=RDS_HOST,
+        user=RDS_USER,
+        password=RDS_PASSWORD,
+        db=RDS_DB_NAME,
+        cursorclass=pymysql.cursors.DictCursor  # This allows results to be accessed like dictionaries
+    )
     return conn
 
 # Function to save parking session
 def save_parking_session(plate, lot_name, slot_name, start_time, end_time, duration):
     conn = get_db_connection()
-    conn.execute('''
-        INSERT INTO parking_sessions (license_plate, lot_name, slot_name, start_time, end_time, duration)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (plate, lot_name, slot_name, start_time.strftime('%Y-%m-%d %H:%M:%S'),
-          end_time.strftime('%Y-%m-%d %H:%M:%S'), duration))
-    conn.commit()
-    conn.close()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute('''
+                INSERT INTO parking_sessions (license_plate, lot_name, slot_name, start_time, end_time, duration)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (plate, lot_name, slot_name, start_time.strftime('%Y-%m-%d %H:%M:%S'),
+                  end_time.strftime('%Y-%m-%d %H:%M:%S'), duration))
+            conn.commit()
+    finally:
+        conn.close()
 
 # Preprocess the license plate image for OCR
 def preprocess_image(img_roi):
