@@ -145,7 +145,7 @@ def send_alert(actual_license_plate, reserved_license_plate):
     # Send SMS
     message = client.messages.create(
         body=message_body,
-        from_="+17174008507",  # Replace with your Twilio phone number
+        from_=os.getenv("TWILIO_NO"),  
         to=manager_phone_number  # Send alert to the parking manager
     )
 
