@@ -4,15 +4,18 @@ from datetime import datetime, timedelta
 import easyocr  # For OCR to extract text from the plate
 import numpy as np  # For preprocessing enhancements
 import re  # For validating license plate format
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'])
 
 # MySQL Database Configuration
-RDS_HOST = "parking.ca1c6oui86e2.us-east-1.rds.amazonaws.com"
-RDS_USER = "root"
-RDS_PASSWORD = "codeath123"
-RDS_DB_NAME = "parking"
+RDS_HOST = os.getenv('RDS_HOST')
+RDS_USER = os.getenv('RDS_USER')
+RDS_PASSWORD = os.getenv('RDS_PASSWORD')
+RDS_DB_NAME = os.getenv('RDS_DB_NAME')
 
 # Helper function to connect to the AWS RDS MySQL database
 def get_db_connection():
